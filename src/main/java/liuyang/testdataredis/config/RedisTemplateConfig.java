@@ -21,6 +21,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.LocalDateTime;
 
 /**
+ * 注意：在RedisAutoConfiguration中已经配置了RedisTemplate和StringRedisTemplate。这里配置是为了修改序列化与反序列化器。
+ *
  * @author liuyang
  * @scine 2021/4/15
  *
