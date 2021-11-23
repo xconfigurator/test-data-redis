@@ -31,6 +31,12 @@ import java.time.LocalDateTime;
  * 参考:
  * 1. pdt脚手架
  * 2. https://www.cnblogs.com/yzeng/p/11522411.html
+ * 3. https://www.bilibili.com/video/BV1fh411Z7Wd?p=34 序列化器
+ *
+ * RedisSerializer
+ *  |- setKeySerializer/setHashKeySerializer = StringRedisSerializer
+ *  |- setValueSerializer/setHashValueSerializer = Jackson2JsonRedisSerializer
+ *
  */
 @Configuration
 @AutoConfigureAfter(RedisAutoConfiguration.class)
@@ -69,7 +75,7 @@ public class RedisTemplateConfig {
         redisTemplate.setKeySerializer(stringRedisSerializer);
         redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
 
-        // 配置模板 hashOperations
+        // 配置模板 hashOperations <String, Object, Object> (StringRedisTemplate.opsForHash(), RedisTemplate.opsForHash())
         redisTemplate.setHashKeySerializer(stringRedisSerializer);
         redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer);
 
