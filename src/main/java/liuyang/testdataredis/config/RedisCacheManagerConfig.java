@@ -8,6 +8,7 @@ import liuyang.testdataredis.serializer.LocalDateTimeDeserializer;
 import liuyang.testdataredis.serializer.LocalDateTimeSerializer;
 // import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 // import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -17,6 +18,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
@@ -36,13 +39,34 @@ import java.time.LocalDateTime;
 @AutoConfigureAfter(RedisAutoConfiguration.class)
 // @ConfigurationProperties(prefix = "spring.cache.redis")
 public class RedisCacheManagerConfig {
-    /*
-    private Duration timeToLive = Duration.ZERO;
-    public void setTimeToLive(Duration timeToLive) {
-        this.timeToLive = timeToLive;
-    }
-     */
 
+    /**
+     * 20221126 调整后的cacheManager注册方法
+     *
+     * @param lettuceConnectionFactory
+     * @param stringRedisSerializer
+     * @param jackson2JsonRedisSerializer
+     * @return
+     */
+    @Bean
+    public CacheManager cacheManager(LettuceConnectionFactory lettuceConnectionFactory
+            , RedisSerializer<String> stringRedisSerializer
+            , Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer) {
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+                // .entryTtl(timeToLive)
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringRedisSerializer))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jackson2JsonRedisSerializer))
+                .disableCachingNullValues();
+
+        RedisCacheManager cacheManager = RedisCacheManager.builder(lettuceConnectionFactory)
+                .cacheDefaults(config)
+                .build();
+
+        return cacheManager;
+    }
+
+
+    /*
     // 这个好像仅仅对Cache起效，而对直接从容器中获取的RedistTemplate无效
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory factory) {
@@ -78,4 +102,5 @@ public class RedisCacheManagerConfig {
 
         return cacheManager;
     }
+     */
 }
