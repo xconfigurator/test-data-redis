@@ -6,11 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import liuyang.testdataredis.serializer.LocalDateTimeDeserializer;
 import liuyang.testdataredis.serializer.LocalDateTimeSerializer;
+import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.data.redis.serializer.*;
 
 import java.time.LocalDateTime;
 
@@ -19,9 +18,10 @@ import java.time.LocalDateTime;
  *
  * @author xconf
  * @since 2022/11/26
+ * @update 2024/2/24 增加序列化器 参考：https://www.bilibili.com/video/BV1Es4y1q7Bf?p=70&vd_source=8bd7b24b38e3e12c558d839b352b32f4
  */
 @Configuration
-public class SerializerConfig {
+public class RedisSerializerConfig {
 
     @Bean
     public RedisSerializer<String> stringRedisSerializer() {
@@ -33,6 +33,15 @@ public class SerializerConfig {
         Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<Object>(Object.class);
         jackson2JsonRedisSerializer.setObjectMapper(initObjectMapper());
         return jackson2JsonRedisSerializer;
+    }
+
+    /**
+     * 202402240116 add liuyang
+     * @return
+     */
+    @Bean
+    public GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer() {
+        return new GenericJackson2JsonRedisSerializer(initObjectMapper());
     }
 
     /**
@@ -48,7 +57,7 @@ public class SerializerConfig {
         ObjectMapper om = new ObjectMapper();
         om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-        // LocalDateTime
+        // LocalDateTime JSR310
         om.registerModule(new JavaTimeModule()
                 .addSerializer(LocalDateTime.class, new LocalDateTimeSerializer())
                 .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer()));

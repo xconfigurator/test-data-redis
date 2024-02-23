@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.*;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -58,6 +59,29 @@ public class RedisTemplateConfig {
     // 详细参见RedisAutoConfiguration的源码
 
     /**
+     * 20240224 使用新的序列化器
+     */
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate3(LettuceConnectionFactory lettuceConnectionFactory
+            , RedisSerializer<String> stringRedisSerializer
+            , GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(lettuceConnectionFactory);
+
+        // 配置模板 valueOperations
+        redisTemplate.setKeySerializer(stringRedisSerializer);
+        redisTemplate.setValueSerializer(genericJackson2JsonRedisSerializer);
+
+        // 配置模板 hashOperations <String, Object, Object> (StringRedisTemplate.opsForHash(), RedisTemplate.opsForHash())
+        redisTemplate.setHashKeySerializer(stringRedisSerializer);
+        redisTemplate.setHashValueSerializer(genericJackson2JsonRedisSerializer);
+
+        // Stream的好像不需要设置
+        return redisTemplate;
+    }
+
+
+    /**
      * 20221126 调整后的redisTemplate注册方法
      *
      * @param lettuceConnectionFactory
@@ -86,7 +110,7 @@ public class RedisTemplateConfig {
 
 
     // 下面的对象可以理解为使用过程中的“快捷方式”
-    @Bean
+   /* @Bean
     public ValueOperations<String, Object> valueOperations(RedisTemplate<String, Object> redisTemplate2) {
         return redisTemplate2.opsForValue();
     }
@@ -132,7 +156,7 @@ public class RedisTemplateConfig {
     public StreamOperations<String, String, Object> stringStringObjectStreamOperations(RedisTemplate<String, Object> redisTemplate2) {
         // Since Redis 5.0 用于MQ场景
         return redisTemplate2.opsForStream();
-    }
+    }*/
 
 
     /**

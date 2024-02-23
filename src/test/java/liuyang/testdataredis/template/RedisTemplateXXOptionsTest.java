@@ -14,12 +14,14 @@ import java.util.Arrays;
  *
  * @author xconf
  * @since 2022/11/26
+ * @deprecated since 2024/2/24 直接使用模板就好。
  */
 @SpringBootTest
 @Slf4j
+@Deprecated
 public class RedisTemplateXXOptionsTest {
 
-    @Autowired
+    /*@Autowired
     ValueOperations<String, Object> valueOperations;
 
     @Autowired
@@ -75,5 +77,5 @@ public class RedisTemplateXXOptionsTest {
     void testZSet() {
         // TODO
 
-    }
+    }*/
 }
